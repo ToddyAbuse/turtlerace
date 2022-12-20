@@ -9,22 +9,27 @@ import turtle as tu
 import random
 #variabler
 run = False
-farger = ["red", "orange", "yellow", "green", "cyan", "blue", "violet", "purple"]
 r = 10
+start = False
+penger = 8
 #gi tittel til spilet
-tu.title("Turtle race")
+tu.title('Turtle race')
+#lister
 turtlist = []
-penger = 5
+farger = ["red", "orange", "yellow", "green", "cyan", "blue", "violet", "purple"]
 betlist = [0,0,0,0,0,0,0,0]
+
+
+#lager skjerm objektet
 screen = tu.Screen()
 
 
-#class
+#klasse til alle racerne
 
 class turtle:
     def __init__(self, farge, pos):
-        self.farge = farge
         self.pos = pos
+        self.farge = farge
         self.turt = tu.Turtle()
         self.turt.shape("turtle")
         self.turt.color(farge)
@@ -35,42 +40,113 @@ class turtle:
     
     def flytt(self):
         rand = random.randint(1, 20)
-        self.pos = (self.pos[0], self.pos[1] + rand)
+        self.pos = (self.pos[0] + rand, self.pos[1])
         self.turt.pendown()
-        self.turt.forward(rand)
-    
-    def reset(self):
-        self.turt.penup()
-        self.turt.setpos(self.pos)    
+        self.turt.fd(rand) 
 
 
-
-#Pen turtle
+#Pen turtle(skriver startknapp)
 pen = tu.Turtle()
 pen.goto(0, 0)
 pen.speed(1)
-pen.shapesize(0.3,0.3)
-
+pen.penup()
+#skriver hvor mye penger du har
+money = tu.Turtle()
+money.hideturtle()
+money.penup()
+#viser hvor du har putta pengene dine
+bet = tu.Turtle()
+bet.penup()
+bet.hideturtle()
    
 def click(x, y):
-    global penger, turtlist, betlist
-    for t in range(len(farger)):
-        if -210 <= x <= -190 and (85 - 30 * t) <= y <= (155 - 50 * t):
-            if betlist[t] > 0:
-                betlist[t] -= 1
-        elif -130 <= x <= -110 and (85 - 30 * t) <= y <= (155 - 50 * t):
-            if penger > 0:
-                penger -= 1
-                betlist[t] += 1
-    print(betlist)
+    global penger, turtlist, betlist, run, start, bet, money, pen
+    if start == False:
+        for t in range(len(farger)):
+            if -250 <= x <= -230 and (135 - 50 * t) <= y <= (155 - 50 * t):
+                if betlist[t] > 0:
+                    betlist[t] -= 1
+                    penger += 1
+                    money.clear()
+                    money.write(f"${penger}", align = "center", font=("Arial",12,"normal"))
+                    bet.clear()
+                    bet.write(f"red: {betlist[0]}, orange: {betlist[1]}, yellow: {betlist[2]}, green: {betlist[3]}, cyan: {betlist[4]}, blue: {betlist[5]}, violet: {betlist[6]}, purple: {betlist[7]}")
+            elif -170 <= x <= -150 and (135 - 50 * t) <= y <= (155 - 50 * t):
+                if penger > 0:
+                    penger -= 1
+                    betlist[t] += 1
+                    money.clear()
+                    money.write(f"${penger}", align = "center", font=("Arial",12,"normal"))
+                    bet.clear()
+                    bet.write(f"red: {betlist[0]}, orange: {betlist[1]}, yellow: {betlist[2]}, green: {betlist[3]}, cyan: {betlist[4]}, blue: {betlist[5]}, violet: {betlist[6]}, purple: {betlist[7]}")
+        if -60 <= x <= 60 and -5 <= y <= 21:
+            start = True
+            for t in range(len(farger)):
+                turtlist[t].turt.clear()
+            pen.clear()
+            pen.showturtle()
+            pen.goto(180,170)
+            pen.pendown()
+            pen.right(90)
+            pen.fd(400)
+            run = True
+            while run:
+                for t in turtlist:
+                   t.flytt()
+                maxfarge = []
+                maxdist = 180
+                for t in turtlist:
+                 if t.pos[0] > -200 and t.pos[0] > maxdist:
+                     maxfarge.append(t.farge)
+                 elif t.pos[0] > -200 and t.pos[0] == maxdist:
+                     maxfarge.append(t.farge)
+                     
+                if len(maxfarge) > 0:
+                    run = False
+                    for x, bet in enumerate(betlist):
+                        for farge in maxfarge: 
+                            value = farger.index(farge)
+                            if x == value:
+                                penger += bet * 2
+                                money.clear()
+                                money.write(f"${penger}", align = "center", font=("Arial",12,"normal"))
+                    if penger == 0:
+                         pen.clear()
+                         pen.penup()
+                         pen.goto(0,0)
+                         pen.write("Du tapte", align = "center", font=("Arial",12,"normal"))
+            if penger > 0: 
+                print(f"Vinneren er {maxfarge}, du vant ${penger}")
+                betlist = [0,0,0,0,0,0,0,0]
+                pen = tu.Turtle()
+                pen.goto(0, 0)
+                pen.speed(1)
+                pen.penup()
+                #skriver hvor mye penger du har
+                money = tu.Turtle()
+                money.hideturtle()
+                money.penup()
+                #viser hvor du har putta pengene dine
+                bet = tu.Turtle()
+                bet.penup()
+                bet.hideturtle()                       
+                turtlist = meny()
+                screen.onclick(click)
+                start = False
+                screen.mainloop()
+ 
+            
 
 
 def meny():
+    global start
     turtlist = []
+    betlist = [0,0,0,0,0,0,0,0]
+    start = False
     tu.clearscreen()
     tu.hideturtle()
     for t in range(len(farger)):
-       turtlist.append(turtle(farger[t], (-160, 150 - t * 50)))
+       turtlist.append(turtle(farger[t], (-200, 150 - t * 50)))
        turtlist[t].turt.showturtle()
     for t in range(len(farger)):
         turtlist[t].turt.fd(3*r)
@@ -105,15 +181,13 @@ def meny():
         turtlist[t].turt.fd(9*r/2)
         
     pen.write("START GAME!", align = "center", font=("Arial",12,"normal"))
-    
+    money.goto(230, 230)
+    money.write(f"${penger}", align = "center", font=("Arial",12,"normal"))
+    bet.goto(-200, 200)
+    bet.write(f"red: {betlist[0]}, orange: {betlist[1]}, yellow: {betlist[2]}, green: {betlist[3]}, cyan: {betlist[4]}, blue: {betlist[5]}, violet: {betlist[6]}, purple: {betlist[7]}")
     return turtlist
-    #for t in range(len(farger)):
-     #   turtlist[t].turt.clear()
-     
+         
 turtlist = meny()
-
 screen.onclick(click)
 screen.mainloop()
-
-while run:
-    pass    
+ 
